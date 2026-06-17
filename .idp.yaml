@@ -1,0 +1,43 @@
+kind: template
+name: "Node.js REST API"
+description: "Express.js REST API — Helmet, CORS, Pino logging, health checks, multi-stage Dockerfile, GitHub Actions CI. Deploys to Lambda or ECS Fargate."
+tech_stack: nodejs
+category: backend
+icon: bi-diagram-3
+
+deploy:
+  type: terraform
+  path: ./infrastructure
+  pipeline: github-actions
+  entry: deploy.yml
+  branch: main
+
+parameters:
+  - name: service_name
+    label: Service Name
+    type: string
+    required: true
+    hint: "Lowercase, hyphens only, 3-30 chars."
+  - name: environment
+    label: Environment
+    type: select
+    required: true
+    options: [{ value: dev, label: Development }, { value: test, label: Test }, { value: prod, label: Production }]
+    default: dev
+  - name: compute
+    label: Compute Type
+    type: select
+    options: [{ value: lambda, label: "Lambda (serverless)" }, { value: ecs-fargate, label: "ECS Fargate (container)" }]
+    default: lambda
+  - name: region
+    label: AWS Region
+    type: string
+    default: eu-west-2
+
+requires:
+  - kind: secret
+    name: AWS_ACCESS_KEY_ID
+    description: "AWS credentials — set in GitHub repo secrets"
+  - kind: secret
+    name: AWS_SECRET_ACCESS_KEY
+    description: "AWS credentials — set in GitHub repo secrets"
